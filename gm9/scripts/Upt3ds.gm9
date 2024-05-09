@@ -1,0 +1,409 @@
+# Script que instala/actualiza Boot9Strap, Luma, GodMode9 y FBI
+# Autor: Kelonio 3Ds
+# Saturn Team 3ds SCENE: Tristanabs, Angelpro09_Xd
+set PREVIEW_MODE 0:/gm9/imagenes/2.png
+
+
+##################### Menu Principal ####################
+@Start
+
+labelsel -s "Selecciona una opcion." Upt3ds_*
+
+goto Start
+
+###################### Proceso Automatico ##############################################################################
+
+@Upt3ds_Proceso_Automatico
+#Automatico############# Actualizando/Instalando Boot9Strap #####################
+
+
+if	not allow -a S:
+	echo "Permiso denegado. Abortando.\nBoot9Strap no se ha instalado"
+	goto Start
+end
+
+#Actualizando Boot9Strap
+find 0:/gm9/Upt3ds/boot9strap.firm B9S
+cp -w -o -n $[B9S] S:/firm0.bin
+cp -w -o -n $[B9S] S:/firm1.bin
+
+#Automatico######################### Primera limpieza #########################
+
+
+rm -o -s 0:/3ds/safehax.3dsx						# Archivo de SafeHax
+rm -o -s 0:/3ds/udsploit.3dsx						# Archivo de UDS Exploit
+rm -o -s 0:/4swords.app								# Archivo de aplicacion Zelda Four Swords
+rm -o -s 0:/a9lh									# Carpeta de Arm9LoaderHax
+rm -o -s 0:/arm9.bin								# Archivo de SafeB9SInstaller
+rm -o -s 0:/arm9loaderhax.bin						# Archivo de arranque para Arm9LoaderHax
+rm -o -s 0:/arm11.bin								# Archivo de SafeB9SInstaller
+rm -o -s 0:/aurei									# Carpeta de AuReiNand
+rm -o -s 0:/AuReiNand.dat							# Archivo de arranque para AuReiNand
+rm -o -s 0:/boot.3dsx								# Archivo de Homebrew Launcher en B9S
+rm -o -s 0:/boot.firm								# Archivo de arranque para Luma 3DS
+rm -o -s 0:/boot.nds								# Archivo Boot.nds de Twilight Menu++
+rm -o -s 0:/boot_hb.3dsx							# Archivo de Homebrew Launcher en A9LH
+
+rm -o -s 0:/Decrypt9.log							# Archivo log de Decrypt9
+rm -o -s 0:/files9									# Carpeta de Arm9LoaderHax
+rm -o -s 0:/hblauncherloader						# Carpeta para lanzar Homebrew Launcher en a9LH
+rm -o -s 0:/hs.app									# Archivo de aplicacion Salud y Seguridad
+rm -o -s 0:/launcher.dat							# Archivo de SafeB9SInstaller
+rm -o -s 0:/LOST.DIR								# Carpeta creada automaticamente por el PC
+rm -o -s 0:/luma									# Carpeta de Luma
+rm -o -s 0:/luma/payloads/ntrboot_flasher.firm		# Archivo de NTRBootHax
+rm -o -s 0:/menuhax									# Carpeta de MenuHax
+rm -o -s 0:/menuhax_padcfg.bin						# Archivo de configuracion de MenuHax
+rm -o -s 0:/ntr.bin									# Archivo de NTRBootHax
+rm -o -s 0:/ntrboot									# Carpeta de NTRBootHax
+rm -o -s 0:/ntrboot.firm							# Archivo de NTRBootHax
+rm -o -s 0:/rei										# Carpeta de ReiNand
+rm -o -s 0:/ReiNand.dat								# Archivo de ReiNand
+rm -o -s 0:/otherapp.bin							# Archivo otherapp
+rm -o -s 0:/private									# Carpeta private
+rm -o -s 0:/public.sav								# Partida guardada de DSiWare para exploits
+rm -o -s 0:/README.md								# Archivo "Leeme"
+rm -o -s 0:/SafeB9SInstaller.bin					# Archivo de SafeB9SInstaller
+rm -o -s 0:/SafeB9SInstaller.dat					# Archivo de SafeB9SInstaller
+rm -o -s 0:/safehaxpayload.bin						# Archivo de SafeHax
+rm -o -s 0:/savedata								# Carpeta de partidas guardadas para exploits
+rm -o -s 0:/SoundHax								# Carpeta de SoundHax
+rm -o -s 0:/splash.bin								# Pantalla de splash
+rm -o -s 0:/sudoku_v0.app							# Archivo de aplicacion Sudoku
+rm -o -s 0:/TinyFormat.cia							# Archivo de instalacion de TinyFormat
+rm -o -s 0:/Tools									# Carpeta con archivos para exploits
+rm -o -s 0:/update									# Carpeta de actualizaciones
+rm -o -s 0:/updates									# Carpeta de actualizaciones
+rm -o -s 0:/webkithax_tmp.bin						# Archivo de WebKitHax
+rm -o -s 0:/browserhax_hblauncher_ropbin_payload.bin
+rm -o -s 0:/arm11code.bin
+goto automatico_fbi
+
+
+#Automatico################ Inyectar FBI en Salud y Seguridad ################
+@automatico_fbi
+    if find 0:/gm9/FBInject/Regiones/*.cia CIALLBAK 
+		install $[CIALLBAK] -s
+	end	
+
+     find 0:/gm9/FBInject/FBI/FBI_Inject.cia FBISRC
+			
+	if	chk $[ONTYPE] "n3ds"
+		find -f 1:/title/00040010/20027300/content/*.app H&SPATH
+	end
+	if	chk $[ONTYPE] "o3ds"
+		find -f 1:/title/00040010/20027300/content/*.app H&SPATH
+	end
+
+if	not allow -a 1:/
+	echo "Permisos denegados. Abortado"
+	rm -o -s $[GM9TEMP]
+	goto MainMenu_Opciones_de_FBI_a_S&S
+end
+
+strsplit -b H&SBAK $[H&SPATH] "."
+set H&SBAK "$[H&SBAK].bak"
+if	find $[H&SBAK] NULL
+	mv -w -k -n $[H&SBAK] $[H&SPATH]
+end
+
+set GM9TEMP "0:/gm9/temp"
+if	not find $[GM9TEMP] NULL
+	mkdir $[GM9TEMP]
+end
+
+imgmount "$[FBISRC]"
+find G:/*.app FBIAPP
+strsplit FBINC $[FBIAPP] "/"
+strsplit -b FBINC $[FBINC] "."
+cp -n -w $[FBIAPP] $[GM9TEMP]/00000002.app
+cp -n -w G:/$[FBINC]/ncch.bin $[GM9TEMP]/FBIncch.bin
+imgumount
+
+imgmount $[H&SPATH]
+cp -n -w G:/ncch.bin $[GM9TEMP]/H&Sncch.bin
+imgumount
+
+set FBI "$[GM9TEMP]/FBIncch.bin"
+set H&S "$[GM9TEMP]/H&Sncch.bin"
+
+inject -n $[FBI]@104:2 $[H&S]@104
+inject -n $[FBI]@111:1 $[H&S]@111
+inject -n $[FBI]@130:D0 $[H&S]@130
+
+inject -n $[H&S]@000:200 $[GM9TEMP]/00000002.app@000
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@3C8
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@400
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@800
+
+@hashext
+if	not shaget $[GM9TEMP]/00000002.app@200:400 $[GM9TEMP]/00000002.app.sha
+	goto hashext
+end
+
+inject -n $[GM9TEMP]/00000002.app.sha@000:020 $[GM9TEMP]/00000002.app@160
+
+@ench&s
+if	not encrypt $[GM9TEMP]/00000002.app
+	goto ench&s
+end
+
+mv $[H&SPATH] $[H&SBAK]
+mv -w $[GM9TEMP]/00000002.app $[H&SPATH]
+
+rm -o -s $[GM9TEMP]
+goto automatico_cias
+
+
+#Automatico############################# Instalar CIAS ##############################
+@automatico_cias
+
+# Instalamos todos los CIAS de la carpeta cias
+@ARCHIVO_CIA
+
+    if find 0:/cias/*.cia ARCHIVO_CIA 
+		if not install -o -s $[ARCHIVO_CIA]
+			echo "Error: Archivo cia no instalado.\nPasa todos los archivos de nuevo\na tu SD y ejecuta de nuevo\neste script."
+			poweroff
+		end
+		rm -o -s $[ARCHIVO_CIA]
+		goto ARCHIVO_CIA
+	else 
+		goto luma_automatico
+	end
+
+
+#Automatico######################### Instalando Luma y GodMode9 #########################
+
+@luma_automatico
+
+rm -o -s 1:boot.firm                                                                        # Eliminar Archivo Luma antigo en CTRNAND
+rm -o -s 1:config.ini                                                                       # Eliminar Configuracion Luma antigo en CTRNAND
+rm -o -s 1:/rw/luma                                                                         # Eliminar Carpeta Luma CTRNAND
+
+
+cp -w -o -s 0:/gm9/Upt3ds/boot.firm 0:/boot.firm											# Archivo de arranque de Luma en SD
+mv -w -o -s 0:/gm9/Upt3ds/boot.firm 1:/boot.firm											# Archivo de arranque de Luma en CTRNAND
+
+cp -w -o -s 0:/gm9/Upt3ds/luma 0:/luma														# Configuracion de Luma y payload de GodMode9 en SD
+mv -w -o -s 0:/gm9/Upt3ds/luma/payloads/GodMode9.firm 1:/rw/luma/payloads/GodMode9.firm		# Archivo de arranque de Godmode9 en SD
+
+cp -w -o -s 0:/gm9/Upt3ds/boot.3dsx 0:/boot.3dsx                                            # Archivo de arranque para Homebrew Launcher
+cp -w -o -s 0:/gm9/Upt3ds/luma 0:/luma
+
+echo "Proceso automatico Completado\n#Saturn3DScene"
+goto Upt3ds_Opciones_de_Apagado
+
+######################################################################################################################
+
+############Proceso Por Pasos################
+
+###################### Actualizando/Instalando Boot9Strap #####################
+@Upt3ds_Actualizar_b9s
+
+if	not allow -a S:
+	echo "Permiso denegado. Abortando.\nBoot9Strap no se ha instalado"
+	goto Start
+end
+
+#Actualizando Boot9Strap
+find 0:/gm9/Upt3ds/boot9strap.firm B9S
+cp -w -o -n $[B9S] S:/firm0.bin
+cp -w -o -n $[B9S] S:/firm1.bin
+echo "Hecho"
+goto Start
+
+########################## Primera limpieza #########################
+@Upt3ds_Primera_Limpieza
+
+rm -o -s 0:/3ds/safehax.3dsx						# Archivo de SafeHax
+rm -o -s 0:/3ds/udsploit.3dsx						# Archivo de UDS Exploit
+rm -o -s 0:/4swords.app								# Archivo de aplicacion Zelda Four Swords
+rm -o -s 0:/a9lh									# Carpeta de Arm9LoaderHax
+rm -o -s 0:/arm9.bin								# Archivo de SafeB9SInstaller
+rm -o -s 0:/arm9loaderhax.bin						# Archivo de arranque para Arm9LoaderHax
+rm -o -s 0:/arm11.bin								# Archivo de SafeB9SInstaller
+rm -o -s 0:/aurei									# Carpeta de AuReiNand
+rm -o -s 0:/AuReiNand.dat							# Archivo de arranque para AuReiNand
+rm -o -s 0:/boot.3dsx								# Archivo de Homebrew Launcher en B9S
+rm -o -s 0:/boot.firm								# Archivo de arranque para Luma 3DS
+rm -o -s 0:/boot.nds								# Archivo Boot.nds de Twilight Menu++
+rm -o -s 0:/boot_hb.3dsx							# Archivo de Homebrew Launcher en A9LH
+
+rm -o -s 0:/Decrypt9.log							# Archivo log de Decrypt9
+rm -o -s 0:/files9									# Carpeta de Arm9LoaderHax
+rm -o -s 0:/hblauncherloader						# Carpeta para lanzar Homebrew Launcher en a9LH
+rm -o -s 0:/hs.app									# Archivo de aplicacion Salud y Seguridad
+rm -o -s 0:/launcher.dat							# Archivo de SafeB9SInstaller
+rm -o -s 0:/LOST.DIR								# Carpeta creada automaticamente por el PC
+rm -o -s 0:/luma									# Carpeta de Luma
+rm -o -s 0:/luma/payloads/ntrboot_flasher.firm		# Archivo de NTRBootHax
+rm -o -s 0:/menuhax									# Carpeta de MenuHax
+rm -o -s 0:/menuhax_padcfg.bin						# Archivo de configuracion de MenuHax
+rm -o -s 0:/ntr.bin									# Archivo de NTRBootHax
+rm -o -s 0:/ntrboot									# Carpeta de NTRBootHax
+rm -o -s 0:/ntrboot.firm							# Archivo de NTRBootHax
+rm -o -s 0:/rei										# Carpeta de ReiNand
+rm -o -s 0:/ReiNand.dat								# Archivo de ReiNand
+rm -o -s 0:/otherapp.bin							# Archivo otherapp
+rm -o -s 0:/private									# Carpeta private
+rm -o -s 0:/public.sav								# Partida guardada de DSiWare para exploits
+rm -o -s 0:/README.md								# Archivo "Leeme"
+rm -o -s 0:/SafeB9SInstaller.bin					# Archivo de SafeB9SInstaller
+rm -o -s 0:/SafeB9SInstaller.dat					# Archivo de SafeB9SInstaller
+rm -o -s 0:/safehaxpayload.bin						# Archivo de SafeHax
+rm -o -s 0:/savedata								# Carpeta de partidas guardadas para exploits
+rm -o -s 0:/SoundHax								# Carpeta de SoundHax
+rm -o -s 0:/splash.bin								# Pantalla de splash
+rm -o -s 0:/sudoku_v0.app							# Archivo de aplicacion Sudoku
+rm -o -s 0:/TinyFormat.cia							# Archivo de instalacion de TinyFormat
+rm -o -s 0:/Tools									# Carpeta con archivos para exploits
+rm -o -s 0:/update									# Carpeta de actualizaciones
+rm -o -s 0:/updates									# Carpeta de actualizaciones
+rm -o -s 0:/webkithax_tmp.bin						# Archivo de WebKitHax
+rm -o -s 0:/browserhax_hblauncher_ropbin_payload.bin
+rm -o -s 0:/arm11code.bin
+
+
+echo "Hecho"
+goto Start
+
+################# Inyectar FBI en Salud y Seguridad ################
+@Upt3ds_FBI_en_S&S
+
+    if find 0:/gm9/FBInject/Regiones/*.cia CIALLBAK 
+		install $[CIALLBAK] -s
+	end	
+
+     find 0:/gm9/FBInject/FBI/FBI_Inject.cia FBISRC
+			
+	if	chk $[ONTYPE] "n3ds"
+		find -f 1:/title/00040010/20027300/content/*.app H&SPATH
+	end
+	if	chk $[ONTYPE] "o3ds"
+		find -f 1:/title/00040010/20027300/content/*.app H&SPATH
+	end
+
+if	not allow -a 1:/
+	echo "Permisos denegados. Abortado"
+	rm -o -s $[GM9TEMP]
+	goto MainMenu_Opciones_de_FBI_a_S&S
+end
+
+strsplit -b H&SBAK $[H&SPATH] "."
+set H&SBAK "$[H&SBAK].bak"
+if	find $[H&SBAK] NULL
+	mv -w -k -n $[H&SBAK] $[H&SPATH]
+end
+
+set GM9TEMP "0:/gm9/temp"
+if	not find $[GM9TEMP] NULL
+	mkdir $[GM9TEMP]
+end
+
+imgmount "$[FBISRC]"
+find G:/*.app FBIAPP
+strsplit FBINC $[FBIAPP] "/"
+strsplit -b FBINC $[FBINC] "."
+cp -n -w $[FBIAPP] $[GM9TEMP]/00000002.app
+cp -n -w G:/$[FBINC]/ncch.bin $[GM9TEMP]/FBIncch.bin
+imgumount
+
+imgmount $[H&SPATH]
+cp -n -w G:/ncch.bin $[GM9TEMP]/H&Sncch.bin
+imgumount
+
+set FBI "$[GM9TEMP]/FBIncch.bin"
+set H&S "$[GM9TEMP]/H&Sncch.bin"
+
+inject -n $[FBI]@104:2 $[H&S]@104
+inject -n $[FBI]@111:1 $[H&S]@111
+inject -n $[FBI]@130:D0 $[H&S]@130
+
+inject -n $[H&S]@000:200 $[GM9TEMP]/00000002.app@000
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@3C8
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@400
+inject -n $[H&S]@108:008 $[GM9TEMP]/00000002.app@800
+
+@hashext
+if	not shaget $[GM9TEMP]/00000002.app@200:400 $[GM9TEMP]/00000002.app.sha
+	goto hashext
+end
+
+inject -n $[GM9TEMP]/00000002.app.sha@000:020 $[GM9TEMP]/00000002.app@160
+
+@ench&s
+if	not encrypt $[GM9TEMP]/00000002.app
+	goto ench&s
+end
+
+mv $[H&SPATH] $[H&SBAK]
+mv -w $[GM9TEMP]/00000002.app $[H&SPATH]
+
+rm -o -s $[GM9TEMP]
+echo "Hecho"
+goto Start
+
+############################## Instalar CIAS ##############################
+@Upt3ds_Instalar_CIAS
+
+# Instalamos todos los CIAS de la carpeta cias
+@ARCHIVO_CIA
+
+    if find 0:/cias/*.cia ARCHIVO_CIA 
+		if not install -o -s $[ARCHIVO_CIA]
+			echo "Error: Archivo cia no instalado.\nPasa todos los archivos de nuevo\na tu SD y ejecuta de nuevo\neste script."
+			poweroff
+		end
+		rm -o -s $[ARCHIVO_CIA]
+		goto ARCHIVO_CIA
+	else 
+		goto Upt3ds_Finalizar
+	end
+echo "Hecho"   
+goto Start
+
+########################## Instalando Luma y GodMode9 #########################
+@Upt3ds_Instalar_Luma_Y_GodMode9
+
+rm -o -s 1:boot.firm                                                                        # Eliminar Archivo Luma antigo en CTRNAND
+rm -o -s 1:config.ini                                                                       # Eliminar Configuracion Luma antigo en CTRNAND
+rm -o -s 1:/rw/luma                                                                         # Eliminar Carpeta Luma CTRNAND
+
+
+cp -w -o -s 0:/gm9/Upt3ds/boot.firm 0:/boot.firm											# Archivo de arranque de Luma en SD
+mv -w -o -s 0:/gm9/Upt3ds/boot.firm 1:/boot.firm											# Archivo de arranque de Luma en CTRNAND
+
+cp -w -o -s 0:/gm9/Upt3ds/luma 0:/luma														# Configuracion de Luma y payload de GodMode9 en SD
+mv -w -o -s 0:/gm9/Upt3ds/luma/payloads/GodMode9.firm 1:/rw/luma/payloads/GodMode9.firm		# Archivo de arranque de Godmode9 en SD
+
+cp -w -o -s 0:/gm9/Upt3ds/boot.3dsx 0:/boot.3dsx                                            # Archivo de arranque para Homebrew Launcher
+cp -w -o -s 0:/gm9/Upt3ds/luma 0:/luma
+
+echo "Hecho"
+goto Start
+############################ Finalizando instalacion ##########################
+@Upt3ds_Finalizar
+
+rm -o -s 0:/gm9/FBInject                        # Eliminando carpeta FBI-Inject
+rm -o -s 0:/gm9/Upt3ds						    # Eliminando carpeta Upt3ds   
+rm -o -s 0:/gm9/scripts/Upt3ds.gm9
+
+
+echo "Actualizacion Finalizada!"
+goto Start
+
+####################### Opciones de Apagado ######################
+@Upt3ds_Opciones_de_Apagado
+labelsel -s "Selecciona una opcion." Power_*
+
+####################### Reiniciar consola ######################
+@Power_Reiniciar_Consola
+reboot
+
+####################### Apagar consola ######################
+@Power_Apagar_Consola
+poweroff
+
+####################### Salir ######################
+@Power_Salir_a_Godmode9
